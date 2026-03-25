@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="Matchmaking.Api/Matchmaking.Api.csproj" />
+  <Project Path="Matchmaking.Worker/Matchmaking.Worker.csproj" />
+  <Project Path="MatchmakingTest.AppHost/MatchmakingTest.AppHost.csproj" />
+  <Project Path="MatchmakingTest.ServiceDefaults/MatchmakingTest.ServiceDefaults.csproj" />
+  <Project Path="MatchMakingTest/MatchMakingTest.csproj" />
+</Solution>
