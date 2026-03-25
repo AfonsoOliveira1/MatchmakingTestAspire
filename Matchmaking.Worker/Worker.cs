@@ -1,4 +1,6 @@
+using MatchmakingTest.Data.Models;
 using StackExchange.Redis;
+using System.Text.Json;
 
 public class Worker : BackgroundService
 {
@@ -13,21 +15,36 @@ public class Worker : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var players = await _redis.ListRangeAsync("queue", 0, 1);
+            var queue = await _redis.ListRangeAsync("queue", 0, 1);
 
-            if (players.Length >= 2)
+            if (queue.Length >= 2)
             {
-                var p1 = players[0].ToString();
-                var p2 = players[1].ToString();
+                List<Player> players = queue.Select(p => JsonSerializer.Deserialize<Player>(p.ToString()))
+                                                .Where(p => p.IsOnQueue == true && p != null)
+                                                .ToList();
+                Player p1 = players[0];
+                Player p2 = players[1];
 
-                var matchId = Guid.NewGuid().ToString();
+                p1.IsOnQueue = false; p1.IsOnQueue = false;
+                p1.OnMatch = true; p2.OnMatch = true;
 
-                await _redis.StringSetAsync($"match:{p1}", matchId);
-                await _redis.StringSetAsync($"match:{p2}", matchId);
+                Match match = new Match
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Player1 = p1,
+                    Player2 = p2,
+                    Start = DateTime.Now,
+                };
+
+                p1.MatchHistory.Add(match);
+                p2.MatchHistory.Add(match);
+
+                await _redis.StringSetAsync($"match:{match.Id}", JsonSerializer.Serialize(match));
 
                 await _redis.ListLeftPopAsync("queue");
                 await _redis.ListLeftPopAsync("queue");
             }
+            await Task.Delay(5, stoppingToken);
         }
     }
 

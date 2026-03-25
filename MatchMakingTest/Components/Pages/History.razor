@@ -1,0 +1,27 @@
+﻿@page "/MatchHistory"
+@rendermode InteractiveServer
+
+<PageTitle>Match History</PageTitle>
+
+<h1>Matches</h1>
+
+<select>
+    @foreach (var player in )
+    {
+        <option value="player">@player.Username</option>
+    }
+</select>
+
+@foreach (var match in Enumerable.Range(1, 10))
+{
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">Match @match</h5>
+            <p class="card-text">This is a description of match @match.</p>
+        </div>
+    </div>
+}
+
+@code {
+    
+}

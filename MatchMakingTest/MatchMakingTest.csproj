@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MatchmakingTest.Data\MatchmakingTest.Data.csproj" />
     <ProjectReference Include="..\MatchmakingTest.ServiceDefaults\MatchmakingTest.ServiceDefaults.csproj" />
   </ItemGroup>
 

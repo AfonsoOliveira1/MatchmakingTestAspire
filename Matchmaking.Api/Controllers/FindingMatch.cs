@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MatchmakingTest.Data.Models;
 using StackExchange.Redis;
+using System.Text.Json;
 
 namespace Matchmaking.Api.Controllers
 {
@@ -14,28 +16,55 @@ namespace Matchmaking.Api.Controllers
             _redis = redis.GetDatabase();
         }
 
-        // GET /matchmaking/match/{playerId}
-        [HttpGet("match/{playerId}")]
-        public async Task<IActionResult> GetMatch(string playerId)
+        // GET /matchmaking/match/{username}
+        [HttpGet("match/{matchid}")]
+        public async Task<IActionResult> GetMatch(string matchid)
         {
-            var matchId = await _redis.StringGetAsync($"match:{playerId}");
+            var matchId = await _redis.StringGetAsync($"match:{matchid}");
             if (matchId.IsNullOrEmpty)
-                return NotFound();
+                return NotFound("No match found");
 
             return Ok(matchId.ToString());
         }
 
-        // POST /matchmaking/queue/{playerId}
-        [HttpPost("queue/{playerId}")]
-        public async Task<IActionResult> AddToQueue(string playerId)
+        // POST /matchmaking/queue/{username}
+        [HttpPost("queue/{username}")]
+        public async Task<IActionResult> AddToQueue(string username)
         {
-            var queue = await _redis.ListRangeAsync("queue");
-            if (queue.Any(x => x.ToString() == playerId))
-                return BadRequest("Player is already in the queue.");
+            RedisValue value = await _redis.HashGetAsync("players", username);
+            if (!value.HasValue)
+                return NotFound("Player not found");
 
-            await _redis.ListRightPushAsync("queue", playerId);
+            Player player = JsonSerializer.Deserialize<Player>(value.ToString())!;
+
+            if (player.IsOnQueue)
+                return Conflict("Player is already on queue");
+
+            player.IsOnQueue = true;
+            await _redis.HashSetAsync("players", username, JsonSerializer.Serialize(player));
+            await _redis.ListRightPushAsync("queue", JsonSerializer.Serialize(player));
 
             return Ok();
-        }   
+        }
+
+        // DELETE /matchmaking/queue/{username}
+        [HttpDelete("queue/{username}")]
+        public async Task<IActionResult> RemoveFromQueue(string username)
+        {
+            RedisValue value = await _redis.HashGetAsync("players", username);
+            if (!value.HasValue)
+                return NotFound("Player not found");
+
+            Player player = JsonSerializer.Deserialize<Player>(value.ToString())!;
+
+            if (!player.IsOnQueue)
+                return Conflict("Player is not in queue");
+
+            player.IsOnQueue = false;
+            await _redis.HashSetAsync("players", username, JsonSerializer.Serialize(player));
+            await _redis.ListRemoveAsync("queue", JsonSerializer.Serialize(player));
+
+            return Ok();
+        }
     }
 }

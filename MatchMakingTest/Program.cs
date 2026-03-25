@@ -8,6 +8,12 @@ builder.AddServiceDefaults();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddHttpClient("Matchmaking.Api", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7148");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
+
 var app = builder.Build();
 
 app.MapDefaultEndpoints();
