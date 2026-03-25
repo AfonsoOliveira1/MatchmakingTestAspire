@@ -13,11 +13,6 @@ namespace Matchmaking.Api.Controllers
         {
             _redis = redis.GetDatabase();
         }
-        [HttpGet]
-        public async Task<IActionResult> ola()
-        {
-            return Ok("a");
-        }
 
         // GET /matchmaking/match/{playerId}
         [HttpGet("match/{playerId}")]
