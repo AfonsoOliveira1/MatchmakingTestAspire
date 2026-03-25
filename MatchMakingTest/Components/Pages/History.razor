@@ -1,27 +1,126 @@
-﻿@page "/MatchHistory"
+@page "/MatchHistory"
 @rendermode InteractiveServer
+@using MatchmakingTest.Data.Models
+@inject Services.ApiClient Api
 
 <PageTitle>Match History</PageTitle>
 
-<h1>Matches</h1>
-
-<select>
-    @foreach (var player in )
-    {
-        <option value="player">@player.Username</option>
-    }
-</select>
-
-@foreach (var match in Enumerable.Range(1, 10))
-{
-    <div class="card mb-3">
-        <div class="card-body">
-            <h5 class="card-title">Match @match</h5>
-            <p class="card-text">This is a description of match @match.</p>
-        </div>
+<div class="page-wrapper">
+    <div class="header">
+        <h1 class="title">MATCH HISTORY</h1>
+        <p class="subtitle">Select a player to view their match records</p>
     </div>
-}
+
+    <div class="selector-row">
+        <div class="select-wrapper">
+            <label class="select-label">PLAYER</label>
+            <select class="player-select" @onchange="OnPlayerSelected">
+                <option value="">— select player —</option>
+                @foreach (var player in players)
+                {
+                    <option value="@player.Username">@player.Username</option>
+                }
+            </select>
+        </div>
+
+        @if (selectedPlayer != null)
+        {
+            <div class="player-stats">
+                <div class="stat">
+                    <span class="stat-value">@selectedPlayer.MatchHistory.Count</span>
+                    <span class="stat-label">MATCHES</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    <span class="stat-value @(selectedPlayer.OnMatch ? "active" : "inactive")">
+                        @(selectedPlayer.OnMatch ? "IN MATCH" : selectedPlayer.IsOnQueue ? "IN QUEUE" : "IDLE")
+                    </span>
+                    <span class="stat-label">STATUS</span>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (selectedPlayer != null)
+    {
+        @if (selectedPlayer.MatchHistory.Count == 0)
+        {
+            <div class="empty-state">
+                <span class="empty-icon">⚔</span>
+                <p>No matches played yet.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-wrapper">
+                <table class="match-table">
+                    <thead>
+                        <tr>
+                            <th>MATCH ID</th>
+                            <th>PLAYER 1</th>
+                            <th>PLAYER 2</th>
+                            <th>STARTED AT</th>
+                            <th>ELAPSED</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var match in selectedPlayer.MatchHistory.OrderByDescending(m => m.Start))
+                        {
+                            <tr class="match-row">
+                                <td class="match-id">@match.Id[..8]<span class="id-rest">@match.Id[8..]</span></td>
+                                <td class="@(match.Player1 == selectedPlayer.Username ? "highlight" : "")">
+                                    @match.Player1
+                                </td>
+                                <td class="@(match.Player2 == selectedPlayer.Username ? "highlight" : "")">
+                                    @match.Player2
+                                </td>
+                                <td class="datetime">@match.Start.ToString("dd MMM yyyy  HH:mm")</td>
+                                <td class="elapsed">@GetElapsed(match.Start)</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="empty-state">
+            <span class="empty-icon">🎮</span>
+            <p>No player selected.</p>
+        </div>
+    }
+</div>
 
 @code {
-    
+    private List<Player> players = new();
+    private Player? selectedPlayer = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        players = await Api.GetAllPlayersAsync();
+    }
+
+    private async Task OnPlayerSelected(ChangeEventArgs e)
+    {
+        var username = e.Value?.ToString();
+        if (string.IsNullOrEmpty(username))
+        {
+            selectedPlayer = null;
+            return;
+        }
+        selectedPlayer = players.FirstOrDefault(p => p.Username == username);
+    }
+
+    private string GetElapsed(DateTime start)
+    {
+        var elapsed = DateTime.Now - start;
+        if (elapsed.TotalDays >= 1)
+            return $"{(int)elapsed.TotalDays}d {elapsed.Hours}h ago";
+        if (elapsed.TotalHours >= 1)
+            return $"{(int)elapsed.TotalHours}h {elapsed.Minutes}m ago";
+        if (elapsed.TotalMinutes >= 1)
+            return $"{(int)elapsed.TotalMinutes}m ago";
+        return "just now";
+    }
 }

@@ -1,73 +1,66 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MatchmakingTest.Data.Models;
-using StackExchange.Redis;
+﻿using MatchmakingTest.Data.Models;
+using MatchmakingTest.Services.Services;
+using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
 namespace Matchmaking.Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class PlayersController : ControllerBase
+    public class PlayersController(IPlayerService service) : ControllerBase
     {
-        private readonly IDatabase _redis;
-
-        public PlayersController(IConnectionMultiplexer redis)
-        {
-            _redis = redis.GetDatabase();
-        }
+        private readonly IPlayerService _service = service;
 
         // GET /players
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            HashEntry[] entries = await _redis.HashGetAllAsync("players");
-            List<Player> players = entries
-                .Select(e => JsonSerializer.Deserialize<Player>(e.ToString()))
-                .Where(p => p != null)!
-                .ToList();
-
-            return Ok(players);
+            return Ok(await _service.GetAll());
         }
 
         // GET /players/{username}
         [HttpGet("{username}")]
         public async Task<IActionResult> GetPlayer(string username)
         {
-            RedisValue value = await _redis.HashGetAsync("players", username);
-            if (!value.HasValue)
-                return NotFound("Player not found");
-
-            Player? player = JsonSerializer.Deserialize<Player>((string)value!);
-            return Ok(player);
+            try
+            {
+                var result = await _service.GetPlayer(username);
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex1)
+            {
+                return NotFound(ex1.Message);
+            }
         }
 
         // POST /players
         [HttpPost]
         public async Task<IActionResult> CreatePlayer([FromBody] string username)
         {
-            bool usernameTaken = await _redis.HashExistsAsync("players", username);
-            if (usernameTaken)
-                return Conflict("Username already in use");
-
-            var player = new Player
+            try
             {
-                Username = username,
-                MatchHistory = new List<Match>()
-            };
-
-            await _redis.HashSetAsync("players", username, JsonSerializer.Serialize(player));
-            return Ok(player);
+                await _service.CreatePlayer(username);
+                return Ok();
+            }
+            catch (Exception ex1)
+            {
+                return NotFound(ex1.Message);
+            }
         }
 
         // DELETE /players/{username}
         [HttpDelete("{username}")]
         public async Task<IActionResult> DeletePlayer(string username)
         {
-            bool deleted = await _redis.HashDeleteAsync("players", username);
-            if (!deleted)
-                return NotFound("Player not found");
-
-            return Ok();
+            try
+            {
+                await _service.DeletePlayer(username);
+                return Ok();
+            }
+            catch (InvalidOperationException ex1)
+            {
+                return NotFound(ex1.Message);
+            }
         }
     }
 }

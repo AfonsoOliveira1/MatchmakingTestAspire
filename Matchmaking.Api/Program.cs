@@ -1,3 +1,5 @@
+using MatchmakingTest.Services.Controllers;
+using MatchmakingTest.Services.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Caching.Distributed;
 using StackExchange.Redis;
@@ -10,7 +12,8 @@ var redisConnection = builder.Configuration.GetConnectionString("Redis");
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
     ConnectionMultiplexer.Connect(redisConnection)
 );
-
+builder.Services.AddScoped<IMatchService, MatchService>();
+builder.Services.AddScoped<IPlayerService, PlayerService>();
 // Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -24,22 +27,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-//// Endpoints
-
-//app.MapGet("/match/{playerId}", async (IDistributedCache cache, string playerId) =>
-//{
-//    var matchId = await cache.GetStringAsync($"match:{playerId}");
-//    return matchId is null ? Results.NotFound() : Results.Ok(matchId);
-//});
-
-//app.MapPost("/queue/{playerId}", async (IDistributedCache cache, string playerId) =>
-//{
-//    var queue = await cache.GetStringAsync("queue") ?? "";
-//    queue += playerId + ",";
-//    await cache.SetStringAsync("queue", queue);
-//    return Results.Ok();
-//});
 
 app.MapControllers();
 

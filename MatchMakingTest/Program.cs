@@ -1,4 +1,7 @@
+using MatchmakingTest.Services.Controllers;
+using MatchmakingTest.Services.Services;
 using MatchMakingTest.Components;
+using MatchMakingTest.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,10 +11,9 @@ builder.AddServiceDefaults();
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddHttpClient("Matchmaking.Api", client =>
+builder.Services.AddHttpClient<ApiClient>(client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7148");
-    client.DefaultRequestHeaders.Add("Accept", "application/json");
+    client.BaseAddress = new Uri("http://api"); // nome que deste no AppHost
 });
 
 var app = builder.Build();

@@ -19,6 +19,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Matchmaking.Api\Matchmaking.Api.csproj" />
 		<ProjectReference Include="..\Matchmaking.Worker\Matchmaking.Worker.csproj" />
+		<ProjectReference Include="..\MatchmakingTest.Services\MatchmakingTest.Services.csproj" />
 		<ProjectReference Include="..\MatchMakingTest\MatchMakingTest.csproj" />
 	</ItemGroup>
 

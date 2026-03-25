@@ -25,14 +25,14 @@ public class Worker : BackgroundService
                 Player p1 = players[0];
                 Player p2 = players[1];
 
-                p1.IsOnQueue = false; p1.IsOnQueue = false;
+                p1.IsOnQueue = false; p2.IsOnQueue = false;
                 p1.OnMatch = true; p2.OnMatch = true;
 
                 Match match = new Match
                 {
                     Id = Guid.NewGuid().ToString(),
-                    Player1 = p1,
-                    Player2 = p2,
+                    Player1 = p1.Username,
+                    Player2 = p2.Username,
                     Start = DateTime.Now,
                 };
 
@@ -40,6 +40,9 @@ public class Worker : BackgroundService
                 p2.MatchHistory.Add(match);
 
                 await _redis.StringSetAsync($"match:{match.Id}", JsonSerializer.Serialize(match));
+
+                await _redis.HashSetAsync("players", p1.Username, JsonSerializer.Serialize(p1));
+                await _redis.HashSetAsync("players", p2.Username, JsonSerializer.Serialize(p2));
 
                 await _redis.ListLeftPopAsync("queue");
                 await _redis.ListLeftPopAsync("queue");

@@ -58,3 +58,209 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;600;800&display=swap');
+
+.page-wrapper {
+    font-family: 'Barlow', sans-serif;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem;
+    color: #e2e8f0;
+}
+
+.header {
+    margin-bottom: 2rem;
+    border-left: 4px solid #f97316;
+    padding-left: 1rem;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    color: #f97316;
+    margin: 0;
+}
+
+.subtitle {
+    margin: 0.25rem 0 0;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    letter-spacing: 0.05em;
+}
+
+/* Selector row */
+.selector-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.select-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.select-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: #64748b;
+}
+
+.player-select {
+    font-family: 'Share Tech Mono', monospace;
+    background: #0f172a;
+    color: #e2e8f0;
+    border: 1px solid #334155;
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    min-width: 220px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+    .player-select:focus {
+        border-color: #f97316;
+    }
+
+/* Stats */
+.player-stats {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    background: #0f172a;
+    border: 1px solid #1e293b;
+    border-radius: 6px;
+    padding: 0.6rem 1.2rem;
+}
+
+.stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #f8fafc;
+}
+
+    .stat-value.active {
+        color: #22c55e;
+    }
+
+    .stat-value.inactive {
+        color: #64748b;
+    }
+
+.stat-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    color: #475569;
+}
+
+.stat-divider {
+    width: 1px;
+    height: 30px;
+    background: #1e293b;
+}
+
+/* Table */
+.table-wrapper {
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.match-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+    .match-table thead tr {
+        background: #0f172a;
+    }
+
+    .match-table th {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        color: #475569;
+        border-bottom: 1px solid #1e293b;
+    }
+
+.match-row {
+    border-bottom: 1px solid #1e293b;
+    transition: background 0.15s;
+}
+
+    .match-row:last-child {
+        border-bottom: none;
+    }
+
+    .match-row:hover {
+        background: #0f172a;
+    }
+
+.match-table td {
+    padding: 0.75rem 1rem;
+    color: #cbd5e1;
+}
+
+.match-id {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: #64748b !important;
+}
+
+.id-rest {
+    opacity: 0.4;
+}
+
+.highlight {
+    color: #f97316 !important;
+    font-weight: 600;
+}
+
+.datetime {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.82rem;
+    color: #94a3b8 !important;
+}
+
+.elapsed {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.82rem;
+    color: #38bdf8 !important;
+}
+
+/* Empty state */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #334155;
+}
+
+.empty-icon {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 0.75rem;
+    filter: grayscale(1);
+    opacity: 0.4;
+}
+
+.empty-state p {
+    font-size: 0.95rem;
+    letter-spacing: 0.05em;
+}

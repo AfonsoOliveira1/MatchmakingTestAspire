@@ -1,9 +1,9 @@
 <Solution>
-  <Project Path="../../../../../../source/repos/MatchmakingTest/Matchmaking.Api/Matchmaking.Api.csproj" />
-  <Project Path="../../../../../../source/repos/MatchmakingTest/Matchmaking.Worker/Matchmaking.Worker.csproj" />
-  <Project Path="../../../../../../source/repos/MatchmakingTest/MatchmakingTest.AppHost/MatchmakingTest.AppHost.csproj" />
-  <Project Path="../../../../../../source/repos/MatchmakingTest/MatchmakingTest.Data/MatchmakingTest.Data.csproj" Id="67d28def-8266-4cb0-a7eb-cad0011c5633" />
-  <Project Path="../../../../../../source/repos/MatchmakingTest/MatchmakingTest.ServiceDefaults/MatchmakingTest.ServiceDefaults.csproj" />
-  <Project Path="../../../../../../source/repos/MatchmakingTest/MatchmakingTest.Services/MatchmakingTest.Services.csproj" Id="48c2309c-e0d9-4b2a-953d-f39c79b55ebc" />
-  <Project Path="../../../../../../source/repos/MatchmakingTest/MatchMakingTest/MatchMakingTest.csproj" />
+  <Project Path="Matchmaking.Api/Matchmaking.Api.csproj" />
+  <Project Path="Matchmaking.Worker/Matchmaking.Worker.csproj" />
+  <Project Path="MatchmakingTest.AppHost/MatchmakingTest.AppHost.csproj" />
+  <Project Path="MatchmakingTest.Data/MatchmakingTest.Data.csproj" Id="e8a8dd8d-534f-4964-82a1-ee2f4f820e87" />
+  <Project Path="MatchmakingTest.ServiceDefaults/MatchmakingTest.ServiceDefaults.csproj" />
+  <Project Path="MatchmakingTest.Services/MatchmakingTest.Services.csproj" Id="990c4ef2-9ab3-49d0-bafe-624eb589081a" />
+  <Project Path="MatchMakingTest/MatchMakingTest.csproj" />
 </Solution>
