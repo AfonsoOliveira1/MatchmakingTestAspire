@@ -6,9 +6,9 @@ namespace MatchMakingTest.Services
     {
         private readonly HttpClient _http;
 
-        public ApiClient(IHttpClientFactory factory)
+        public ApiClient(HttpClient client)
         {
-            _http = factory.CreateClient("MatchmakingApi");
+            _http = client;
         }
 
         // Players

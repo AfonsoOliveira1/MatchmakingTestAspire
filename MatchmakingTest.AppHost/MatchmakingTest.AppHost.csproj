@@ -12,7 +12,14 @@
 		<PackageReference Include="Aspire.Hosting.AppHost" Version="13.2.0" />
 		<PackageReference Include="Aspire.Hosting" Version="13.2.0" />
 		<PackageReference Include="Aspire.Hosting.Docker" Version="13.2.0" />
+		<PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.2.0" />
 		<PackageReference Include="Aspire.Hosting.Redis" Version="13.2.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.5" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.5">
+		  <PrivateAssets>all</PrivateAssets>
+		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
 	</ItemGroup>
 
 

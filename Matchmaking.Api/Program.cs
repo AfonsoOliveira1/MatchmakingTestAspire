@@ -12,6 +12,7 @@ var redisConnection = builder.Configuration.GetConnectionString("Redis");
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
     ConnectionMultiplexer.Connect(redisConnection)
 );
+
 builder.Services.AddScoped<IMatchService, MatchService>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
 // Swagger

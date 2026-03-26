@@ -13,7 +13,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddHttpClient<ApiClient>(client =>
 {
-    client.BaseAddress = new Uri("http://api"); // nome que deste no AppHost
+    client.BaseAddress = new Uri(builder.Configuration["API_HTTPS"]); 
 });
 
 var app = builder.Build();

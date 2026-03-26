@@ -4,6 +4,8 @@ builder.AddDockerComposeEnvironment("dev-environment");
 
 var redis = builder.AddRedis("Redis").WithRedisInsight();
 
+var postgres = builder.AddPostgres("PostgreSql").WithPgAdmin();
+
 var api = builder.AddProject<Projects.Matchmaking_Api>("api")
                      .WithReference(redis);
 

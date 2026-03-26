@@ -109,7 +109,7 @@
             selectedPlayer = null;
             return;
         }
-        selectedPlayer = players.FirstOrDefault(p => p.Username == username);
+        selectedPlayer = await Api.GetPlayerAsync(username);
     }
 
     private string GetElapsed(DateTime start)
