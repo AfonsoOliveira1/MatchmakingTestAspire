@@ -9,6 +9,7 @@ namespace MatchmakingTest.Services.Services
     {
         Task<List<Player>> GetAll();
         Task<Player> GetPlayer(string username);
+        Task<List<Match>> GetPlayerMatches(string username);
         Task CreatePlayer(string username);
         Task DeletePlayer(string username);
     }

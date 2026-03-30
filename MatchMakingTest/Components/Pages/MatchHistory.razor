@@ -67,7 +67,7 @@
                         @foreach (var match in selectedPlayer.MatchHistory.OrderByDescending(m => m.Start))
                         {
                             <tr class="match-row">
-                                <td class="match-id">@match.Id[..8]<span class="id-rest">@match.Id[8..]</span></td>
+                                <td class="match-id">@match.Id[..8]<span class="id-rest">@match.Id</span></td>
                                 <td class="@(match.Player1 == selectedPlayer.Username ? "highlight" : "")">
                                     @match.Player1
                                 </td>
@@ -75,7 +75,9 @@
                                     @match.Player2
                                 </td>
                                 <td class="datetime">@match.Start.ToString("dd MMM yyyy  HH:mm")</td>
-                                <td class="elapsed">@GetElapsed(match.Start)</td>
+                                <td class="elapsed">
+                                    @(match.Ended == null ? GetElapsed(match.Start) : match.Ended.ToString())
+                                </td>
                             </tr>
                         }
                     </tbody>
@@ -110,11 +112,12 @@
             return;
         }
         selectedPlayer = await Api.GetPlayerAsync(username);
+        selectedPlayer.MatchHistory = await Api.GetPlayerMatchHistoryAsync(username);
     }
 
     private string GetElapsed(DateTime start)
     {
-        var elapsed = DateTime.Now - start;
+        var elapsed = DateTime.UtcNow - start;
         if (elapsed.TotalDays >= 1)
             return $"{(int)elapsed.TotalDays}d {elapsed.Hours}h ago";
         if (elapsed.TotalHours >= 1)
@@ -122,5 +125,10 @@
         if (elapsed.TotalMinutes >= 1)
             return $"{(int)elapsed.TotalMinutes}m ago";
         return "just now";
+    }
+
+    private string MatchDetail()
+    {
+        return $"Match lasted  seconds";
     }
 }

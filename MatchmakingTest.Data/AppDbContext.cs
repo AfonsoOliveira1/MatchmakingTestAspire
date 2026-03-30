@@ -1,5 +1,4 @@
-﻿// Data/AppDbContext.cs
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MatchmakingTest.Data.Models;
 
 namespace MatchmakingTest.Data
@@ -16,23 +15,42 @@ namespace MatchmakingTest.Data
             modelBuilder.Entity<Player>(entity =>
             {
                 entity.HasKey(p => p.Username);
-                entity.Property(p => p.Username).IsRequired().HasMaxLength(50);
-                entity.Property(p => p.IsOnQueue).HasDefaultValue(false);
-                entity.Property(p => p.OnMatch).HasDefaultValue(false);
+                entity.Property(p => p.Username)
+                      .IsRequired()
+                      .HasMaxLength(50);
 
-                entity.HasMany(p => p.MatchHistory)
-                      .WithOne()
-                      .HasForeignKey("PlayerUsername")
-                      .OnDelete(DeleteBehavior.Cascade);
+                entity.Property(p => p.IsOnQueue)
+                      .HasDefaultValue(false);
+
+                entity.Property(p => p.OnMatch)
+                      .HasDefaultValue(false);
+
+                entity.Property(p => p.QueueStart)
+                      .IsRequired(false);
+
+                entity.Ignore(p => p.MatchHistory);
             });
 
             modelBuilder.Entity<Match>(entity =>
             {
                 entity.HasKey(m => m.Id);
-                entity.Property(m => m.Id).IsRequired();
-                entity.Property(m => m.Player1).IsRequired().HasMaxLength(50);
-                entity.Property(m => m.Player2).IsRequired().HasMaxLength(50);
-                entity.Property(m => m.Start).IsRequired();
+
+                entity.Property(m => m.Id)
+                      .IsRequired();
+
+                entity.Property(m => m.Player1)
+                      .IsRequired()
+                      .HasMaxLength(50);
+
+                entity.Property(m => m.Player2)
+                      .IsRequired()
+                      .HasMaxLength(50);
+
+                entity.Property(m => m.Start)
+                      .IsRequired();
+
+                entity.Property(m => m.Ended)
+                      .IsRequired(false);
             });
         }
     }

@@ -13,6 +13,10 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.5">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.5" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.5" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
@@ -22,5 +26,6 @@
   <ItemGroup>
     <ProjectReference Include="..\MatchmakingTest.Data\MatchmakingTest.Data.csproj" />
     <ProjectReference Include="..\MatchmakingTest.ServiceDefaults\MatchmakingTest.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\MatchmakingTest.Services\MatchmakingTest.Services.csproj" />
   </ItemGroup>
 </Project>

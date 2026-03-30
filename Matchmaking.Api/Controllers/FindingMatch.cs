@@ -26,6 +26,21 @@ namespace Matchmaking.Api.Controllers
             }
         }
 
+        // POST /matchmaking/addmatch
+        [HttpPost("addmatch")]
+        public async Task<IActionResult> AddAMatch(Match match)
+        {
+            try
+            {
+                await _service.AddMatch(match);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         // POST /matchmaking/queue/{username}
         [HttpPost("queue/{username}")]
         public async Task<IActionResult> AddToQueue(string username)
@@ -57,6 +72,21 @@ namespace Matchmaking.Api.Controllers
             catch (InvalidOperationException ex1)
             {
                 return NotFound(ex1.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // POST /matchmaking/matchend/{matchid}
+        [HttpPut("matchend/{matchid}")]
+        public async Task<IActionResult> EndMatch(string matchid)
+        {
+            try
+            {
+                await _service.EndMatch(matchid);
+                return Ok();
             }
             catch (Exception ex)
             {

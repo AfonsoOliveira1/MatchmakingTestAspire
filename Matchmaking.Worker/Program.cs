@@ -1,17 +1,25 @@
+using MatchmakingTest.Data;
+using MatchmakingTest.Services.Controllers;
+using MatchmakingTest.Services.Services;
+using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-// worker vai consumir redis
+// Redis
 var redisConnection = builder.Configuration.GetConnectionString("Redis");
-
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
     ConnectionMultiplexer.Connect(redisConnection)
 );
 
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IMatchService, MatchService>();
+builder.Services.AddScoped<IPlayerService, PlayerService>();
 
 builder.AddServiceDefaults();
 builder.Services.AddHostedService<Worker>();
 
-var host = builder.Build();
-host.Run();
+var app = builder.Build();
+app.Run();

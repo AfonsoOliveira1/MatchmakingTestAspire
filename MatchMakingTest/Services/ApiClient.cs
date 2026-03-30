@@ -22,6 +22,12 @@ namespace MatchMakingTest.Services
             return await _http.GetFromJsonAsync<Player>($"players/{username}");
         }
 
+        public async Task<List<Match>> GetPlayerMatchHistoryAsync(string username)
+        {
+            return await _http.GetFromJsonAsync<List<Match>>($"players/matchhistory/{username}")
+                   ?? new();
+        }
+
         public async Task CreatePlayerAsync(string username)
         {
             await _http.PostAsJsonAsync("players", username);
@@ -33,11 +39,6 @@ namespace MatchMakingTest.Services
         }
 
         // Queue
-        public async Task<Match?> GetMatchAsync(string matchid)
-        {
-            return await _http.GetFromJsonAsync<Match>($"matchmaking/match/{matchid}");
-        }
-
         public async Task AddToQueueAsync(string username)
         {
             await _http.PostAsync($"matchmaking/queue/{username}", null);
@@ -46,6 +47,22 @@ namespace MatchMakingTest.Services
         public async Task RemoveFromQueueAsync(string username)
         {
             await _http.DeleteAsync($"matchmaking/queue/{username}");
+        }
+
+        // Matches
+        public async Task<Match?> GetMatchAsync(string matchid)
+        {
+            return await _http.GetFromJsonAsync<Match>($"matchmaking/match/{matchid}");
+        }
+
+        public async Task AddMatchAsync(Match match)
+        {
+            await _http.PostAsJsonAsync("matchmaking/addmatch", match);
+        }
+
+        public async Task EndMatchAsync(string matchid)
+        {
+            await _http.PutAsync($"matchmaking/matchend/{matchid}", null);
         }
     }
 }

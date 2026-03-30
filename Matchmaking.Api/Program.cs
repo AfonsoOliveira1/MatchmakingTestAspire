@@ -1,28 +1,37 @@
+using MatchmakingTest.Data;
 using MatchmakingTest.Services.Controllers;
 using MatchmakingTest.Services.Services;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Redis (Aspire injeta a connection string automaticamente)
+// Redis
 var redisConnection = builder.Configuration.GetConnectionString("Redis");
-
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
     ConnectionMultiplexer.Connect(redisConnection)
 );
 
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
 builder.Services.AddScoped<IMatchService, MatchService>();
 builder.Services.AddScoped<IPlayerService, PlayerService>();
-// Swagger
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Swagger UI
+// Migrações
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -30,5 +39,4 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapControllers();
-
 app.Run();

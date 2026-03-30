@@ -1,7 +1,254 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@inject Services.ApiClient Api
+@implements IDisposable
 
-<PageTitle>Home</PageTitle>
+@using MatchmakingTest.Data.Models
 
-<h1>Hello, world!</h1>
+<PageTitle>Matchmaking</PageTitle>
 
-Welcome to your new app.
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="validation-message" style="margin-bottom: 1.25rem; font-size: 0.85rem;">@errorMessage</div>
+}
+
+<div class="page-wrapper">
+
+    <div class="header">
+        <h1 class="title">MATCHMAKING</h1>
+        <p class="subtitle">Procura de partida em curso</p>
+    </div>
+
+    <div class="select-wrapper">
+        <label class="select-label">PLAYER</label>
+        <select class="player-select" @onchange="OnPlayerSelected">
+            <option value="">— select player —</option>
+            @foreach (var player in players)
+            {
+                <option value="@player.Username">@player.Username</option>
+            }
+        </select>
+    </div>
+
+    <div class="table-wrapper" style="padding: 2.5rem; text-align: center;">
+
+        @if (state == QueueState.Idle)
+        {
+            <div style="margin-bottom: 2rem;">
+                <span class="stat-value inactive" style="font-size: 1rem; display: block; margin-bottom: 0.5rem;">FORA DA FILA</span>
+                <span class="stat-label">Clica para procurar uma partida</span>
+            </div>
+
+            <button class="player-select"
+                    style="padding: 0.75rem 3rem; border-color: #f97316; color: #f97316; font-size: 1rem; font-weight: 800; letter-spacing: 0.15em;"
+                    @onclick="JoinQueue">
+                ENTRAR NA FILA
+            </button>
+        }
+
+        @if (state == QueueState.Searching)
+        {
+            <div style="margin-bottom: 2.5rem;">
+                <div style="display: flex; justify-content: center; gap: 6px; margin-bottom: 1.5rem;">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+                <span class="stat-value active" style="font-size: 0.85rem; letter-spacing: 0.2em; display: block; margin-bottom: 0.4rem;">
+                    A PROCURAR PARTIDA...
+                </span>
+                @if (selectedPlayer?.QueueStart != null)
+                {
+                    <span class="elapsed">@FormatTime((int)(DateTime.UtcNow - selectedPlayer.QueueStart.Value).TotalSeconds)</span>
+                }
+
+            </div>
+
+            <div class="player-stats" style="justify-content: center; margin-bottom: 2rem;">
+                <div class="stat">
+                    <span class="stat-value active">EM FILA</span>
+                    <span class="stat-label">ESTADO</span>
+                </div>
+                <div class="stat-divider"></div>
+                <div class="stat">
+                    @if (selectedPlayer?.QueueStart != null)
+                    {
+                        <span class="elapsed">@FormatTime((int)(DateTime.UtcNow - selectedPlayer.QueueStart.Value).TotalSeconds)</span>
+                    }
+                    <span class="stat-label">TEMPO</span>
+                </div>
+            </div>
+
+            <button class="player-select"
+                    style="padding: 0.6rem 2.5rem; border-color: #334155; color: #64748b; font-size: 0.85rem; letter-spacing: 0.12em;"
+                    @onclick="LeaveQueue">
+                CANCELAR
+            </button>
+        }
+
+        @if (state == QueueState.Found)
+        {
+            <div style="margin-bottom: 2rem;">
+                <span style="font-size: 2.5rem; display: block; margin-bottom: 1rem;">⚔️</span>
+                <span class="highlight" style="font-size: 1.1rem; letter-spacing: 0.2em; display: block; margin-bottom: 0.4rem;">
+                    PARTIDA ENCONTRADA!
+                </span>
+                <span class="stat-label">Encontrada em</span>
+            </div>
+
+            <button class="player-select"
+                    style="padding: 0.75rem 3rem; border-color: #f97316; color: #f97316; font-size: 1rem; font-weight: 800; letter-spacing: 0.15em;"
+                    @onclick="Reset">
+                NOVA FILA
+            </button>
+        }
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="validation-message" style="margin-top: 1.5rem; font-size: 0.85rem;">@errorMessage</div>
+        }
+
+    </div>
+</div>
+@code {
+    private enum QueueState { Idle, Searching, Found }
+
+    private QueueState state = QueueState.Idle;
+    private int elapsed = 0;
+    private string? errorMessage;
+
+    private List<Player> players = new();
+    private Player? selectedPlayer = null;
+
+    // Timer para atualizar o contador em tempo real
+    private System.Threading.Timer? _timer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        players = await Api.GetAllPlayersAsync();
+    }
+
+    private async Task OnPlayerSelected(ChangeEventArgs e)
+    {
+        var username = e.Value?.ToString();
+        if (string.IsNullOrEmpty(username))
+        {
+            selectedPlayer = null;
+            StopTimer();
+            return;
+        }
+        selectedPlayer = await Api.GetPlayerAsync(username);
+
+        if (selectedPlayer.IsOnQueue && selectedPlayer.QueueStart != null)
+        {
+            state = QueueState.Searching;
+            elapsed = (int)(DateTime.UtcNow - selectedPlayer.QueueStart.Value).TotalSeconds;
+            StartTimer();
+        }
+        else if (selectedPlayer.OnMatch)
+        {
+            state = QueueState.Found;
+            StopTimer();
+        }
+        else
+        {
+            state = QueueState.Idle;
+            StopTimer();
+        }
+    }
+
+    private async Task JoinQueue()
+    {
+        if (selectedPlayer is null)
+        {
+            errorMessage = "Seleciona um jogador primeiro.";
+            return;
+        }
+
+        errorMessage = null;
+
+        try
+        {
+            await Api.AddToQueueAsync(selectedPlayer.Username);
+
+            // Recarrega o jogador atualizado
+            selectedPlayer = await Api.GetPlayerAsync(selectedPlayer.Username);
+
+            // Atualiza o estado do UI
+            if (selectedPlayer.IsOnQueue && selectedPlayer.QueueStart != null)
+            {
+                state = QueueState.Searching;
+                elapsed = (int)(DateTime.UtcNow - selectedPlayer.QueueStart.Value).TotalSeconds;
+                StartTimer();
+            }
+            else
+            {
+                state = QueueState.Idle;
+                StopTimer();
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            state = QueueState.Idle;
+            StopTimer();
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task LeaveQueue()
+    {
+        StopTimer();
+        try
+        {
+            if (selectedPlayer != null)
+                await Api.RemoveFromQueueAsync(selectedPlayer.Username);
+        }
+        catch (InvalidOperationException ex)
+        {
+            errorMessage = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        Reset();
+        StateHasChanged();
+    }
+
+    private void Reset()
+    {
+        elapsed = 0;
+        errorMessage = null;
+        state = QueueState.Idle;
+        StopTimer();
+    }
+
+    private void StartTimer()
+    {
+        StopTimer();
+        _timer = new System.Threading.Timer(async _ =>
+        {
+            await InvokeAsync(StateHasChanged);
+        }, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+    }
+
+    private void StopTimer()
+    {
+        _timer?.Dispose();
+        _timer = null;
+    }
+
+    public void Dispose()
+    {
+        StopTimer();
+    }
+
+    private static string FormatTime(int seconds)
+    {
+        var m = seconds / 60;
+        var s = seconds % 60;
+        return $"{m:D2}:{s:D2}";
+    }
+}

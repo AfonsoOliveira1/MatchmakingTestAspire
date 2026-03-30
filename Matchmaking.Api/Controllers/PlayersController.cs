@@ -33,6 +33,21 @@ namespace Matchmaking.Api.Controllers
             }
         }
 
+        // GET /players/matchhistory/{username}
+        [HttpGet("matchhistory/{username}")]
+        public async Task<IActionResult> MatchHistory(string username)
+        {
+            try
+            {
+                var result = await _service.GetPlayerMatches(username);
+                return Ok(result);
+            }
+            catch (Exception ex1)
+            {
+                return NotFound(ex1.Message);
+            }
+        }
+
         // POST /players
         [HttpPost]
         public async Task<IActionResult> CreatePlayer([FromBody] string username)

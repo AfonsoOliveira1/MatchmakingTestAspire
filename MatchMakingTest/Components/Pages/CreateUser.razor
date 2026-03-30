@@ -1,0 +1,90 @@
+@page "/CreateUser"
+@using System.ComponentModel.DataAnnotations
+@inject Services.ApiClient Api
+
+<PageTitle>Criar Utilizador</PageTitle>
+
+<div class="page-wrapper">
+
+    <div class="header">
+        <h1 class="title">CRIAR UTILIZADOR</h1>
+        <p class="subtitle">Registo de novo utilizador no sistema</p>
+    </div>
+
+    <div class="table-wrapper" style="padding: 2rem 2.5rem;">
+        <EditForm Model="Input" OnValidSubmit="HandleSubmit" FormName="CreateUser">
+            <DataAnnotationsValidator />
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="validation-message" style="margin-bottom: 1.25rem; font-size: 0.85rem;">@errorMessage</div>
+            }
+
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div style="margin-bottom: 1.25rem; font-size: 0.85rem; color: #22c55e;">@successMessage</div>
+            }
+
+            <div class="select-wrapper" style="margin-bottom: 2rem;">
+                <label class="select-label" for="Username">USERNAME</label>
+                <InputText id="Username"
+                           class="player-select"
+                           placeholder="ex: joao.silva"
+                           @bind-Value="Input.Username" />
+                <ValidationMessage For="() => Input.Username"
+                                   class="validation-message"
+                                   style="font-size: 0.78rem; margin-top: 0.4rem; display: block;" />
+            </div>
+
+            <div style="height: 1px; background: #1e293b; margin-bottom: 2rem;"></div>
+
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit"
+                        class="player-select"
+                        style="min-width: unset; padding: 0.5rem 2rem; background: #f97316; border-color: #f97316; color: #0f172a; font-weight: 800; letter-spacing: 0.12em; cursor: pointer;">
+                    CRIAR
+                </button>
+                <a href="/"
+                   class="player-select"
+                   style="min-width: unset; padding: 0.5rem 2rem; text-decoration: none; text-align: center; color: #94a3b8;">
+                    CANCELAR
+                </a>
+            </div>
+        </EditForm>
+    </div>
+
+</div>
+
+@code {
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+    private string? errorMessage = null;
+    private string? successMessage = null;
+
+    private async Task HandleSubmit()
+    {
+        try
+        {
+            await Api.CreatePlayerAsync(Input.Username);
+        }
+        catch(Exception ex)
+        {
+            errorMessage = ex.Message;
+            successMessage = null;
+            return;
+        }
+        successMessage = $"Utilizador \"{Input.Username}\" criado com sucesso!";
+        errorMessage = null;
+        Input = new InputModel();
+    }
+
+    public class InputModel
+    {
+        [Required(ErrorMessage = "O Username é obrigatório.")]
+        [StringLength(30, MinimumLength = 3,
+            ErrorMessage = "O Username deve ter entre 3 e 30 caracteres.")]
+        [RegularExpression(@"^[a-zA-Z0-9._]+$",
+            ErrorMessage = "Apenas letras, números, ponto (.) e underscore (_) são permitidos.")]
+        public string Username { get; set; } = string.Empty;
+    }
+}
