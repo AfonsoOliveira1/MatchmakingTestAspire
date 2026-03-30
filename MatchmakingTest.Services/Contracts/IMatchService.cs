@@ -13,6 +13,8 @@ namespace MatchmakingTest.Services.Services
         Task AddToQueue(string username);
         Task RemoveFromQueue(string username);
         Task<(Player p1, Player p2)> GetTwoPlayersAsync();
-        Task EndMatch(string matchid);
+        Task EndMatchUsername(string username);
+        Task EndMatchInternal(Match match);
+        Task EndMatchId(string matchid);
     }
 }

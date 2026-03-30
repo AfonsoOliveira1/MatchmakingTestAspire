@@ -1,8 +1,14 @@
 @using MatchmakingTest.Data.Models
 
-<input asp-for="Input.Username"
-       type="text"
+<input type="text"
        class="player-select"
        placeholder="ex: joao.silva"
        autocomplete="username"
-       autofocus />
+       autofocus
+       @bind="Username"
+       @bind:event="oninput" />
+
+@code {
+    [Parameter] public string Username { get; set; } = "";
+    [Parameter] public EventCallback<string> UsernameChanged { get; set; } //evento para atualizar sempre
+}

@@ -1,11 +1,12 @@
-﻿using MatchmakingTest.Data;
-using MatchmakingTest.Data.Models;
+﻿using MatchmakingTest.Data.Models;
+using MatchmakingTest.Data;
 using MatchmakingTest.Services.Services;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 using System.Collections;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace MatchmakingTest.Services.Controllers
 {
@@ -21,7 +22,7 @@ namespace MatchmakingTest.Services.Controllers
             _playerService = playerservice;
         }
 
-        public async Task<Match> GetMatch(string matchid)
+        public async Task<Data.Models.Match> GetMatch(string matchid)
         {
             var matchId = await _redis.StringGetAsync($"match:{matchid}");
             if (matchId.IsNullOrEmpty)
@@ -36,18 +37,18 @@ namespace MatchmakingTest.Services.Controllers
             }
             else
             {
-                Match match = JsonSerializer.Deserialize<Match>(matchId.ToString())!;
+                Data.Models.Match match = JsonSerializer.Deserialize<Data.Models.Match>(matchId.ToString())!;
                 return match;
             }
         }
-        public async Task StartMatch(Match match)
+        public async Task StartMatch(Data.Models.Match match)
         {
             match.Start = DateTime.UtcNow;
             match.Ended = null;
             await _redis.StringSetAsync($"match:{match.Id}", JsonSerializer.Serialize(match));
             await AddMatch(match);
         }
-        public async Task AddMatch(Match match)
+        public async Task AddMatch(Data.Models.Match match)
         {
             _context.Matches.Add(match);
             await _context.SaveChangesAsync();
@@ -102,13 +103,15 @@ namespace MatchmakingTest.Services.Controllers
             return (p1, p2);
         }
 
-
-        public async Task EndMatch(string matchid)
+        public async Task EndMatchInternal(Data.Models.Match match)
         {
-            Match match = await GetMatch(matchid);
+            if (match == null)
+                match = await GetMatch(match.Id);
+
+            if(match == null)
+                throw new InvalidOperationException("Match not found.");
 
             match.Ended = DateTime.UtcNow;
-
             _context.Matches.Update(match);
             await _context.SaveChangesAsync();
 
@@ -118,8 +121,32 @@ namespace MatchmakingTest.Services.Controllers
             p1.OnMatch = false;
             p2.OnMatch = false;
 
+            await _redis.StringSetAsync($"match:{match.Id}", JsonSerializer.Serialize(match));
             await _redis.HashSetAsync("players", p1.Username, JsonSerializer.Serialize(p1));
             await _redis.HashSetAsync("players", p2.Username, JsonSerializer.Serialize(p2));
+        }
+
+        public async Task EndMatchUsername(string username)
+        {
+            Data.Models.Match match = await _context.Matches
+                .Where(m => m.Ended == null &&
+                       (m.Player1 == username || m.Player2 == username))
+                .FirstOrDefaultAsync();
+
+            if (match == null)
+                throw new InvalidOperationException($"No active match found for '{username}'.");
+
+            await EndMatchInternal(match);
+        }
+
+        public async Task EndMatchId(string matchid)
+        {
+            Data.Models.Match match = await GetMatch(matchid);
+
+            if (match == null)
+                throw new InvalidOperationException($"No active match found.");
+
+            await EndMatchInternal(match);
         }
     }
 }

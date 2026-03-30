@@ -80,15 +80,17 @@ namespace MatchmakingTest.Services.Controllers
 
         public async Task DeletePlayer(string username)
         {
-            bool deleted = await _redis.HashDeleteAsync("players", username);
-            if (!deleted)
-                throw new InvalidOperationException("Player not found");
+            Player player = await GetPlayer(username);
 
-            var player = await _context.Players.FirstOrDefaultAsync(p => p.Username == username);
             if(player != null)
             {
                 _context.Players.Remove(player);
                 await _context.SaveChangesAsync();
+                await _redis.HashDeleteAsync("players", username);
+            }
+            else
+            {
+                throw new InvalidOperationException("Player not found");
             }
         }
     }

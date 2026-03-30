@@ -60,9 +60,13 @@ namespace MatchMakingTest.Services
             await _http.PostAsJsonAsync("matchmaking/addmatch", match);
         }
 
-        public async Task EndMatchAsync(string matchid)
+        public async Task EndMatchIdAsync(string matchid)
         {
-            await _http.PutAsync($"matchmaking/matchend/{matchid}", null);
+            await _http.PutAsync($"matchmaking/matchendID/{matchid}", null);
+        }
+        public async Task EndMatchUsernameAsync(string username)
+        {
+            await _http.PutAsync($"matchmaking/matchendUsername/{username}", null);
         }
     }
 }

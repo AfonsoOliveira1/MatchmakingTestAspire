@@ -80,12 +80,27 @@ namespace Matchmaking.Api.Controllers
         }
 
         // POST /matchmaking/matchend/{matchid}
-        [HttpPut("matchend/{matchid}")]
+        [HttpPut("matchendID/{matchid}")]
         public async Task<IActionResult> EndMatch(string matchid)
         {
             try
             {
-                await _service.EndMatch(matchid);
+                await _service.EndMatchId(matchid);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // POST /matchmaking/matchend/{username}
+        [HttpPut("matchendUsername/{username}")]
+        public async Task<IActionResult> EndMatchUsername(string username)
+        {
+            try
+            {
+                await _service.EndMatchUsername(username);
                 return Ok();
             }
             catch (Exception ex)

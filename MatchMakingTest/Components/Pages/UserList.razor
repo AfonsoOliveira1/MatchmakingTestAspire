@@ -1,0 +1,97 @@
+﻿@page "/UserList"
+@rendermode InteractiveServer
+@using MatchmakingTest.Data.Models
+@inject Services.ApiClient Api
+
+<PageTitle>User List</PageTitle>
+
+<div class="page-wrapper">
+    <div class="header">
+        <h1 class="title">ARENA ROSTER</h1>
+        <p class="subtitle">ACTIVE COMBATANTS — @players.Count REGISTERED</p>
+    </div>
+
+    @if (players.Count == 0)
+    {
+        <div class="empty-state">
+            <span class="empty-icon">⚔</span>
+            <p>No players registered.</p>
+        </div>
+    }
+    else
+    {
+        <div class="table-wrapper">
+            <table class="match-table">
+                <thead>
+                    <tr>
+                        <th>USERNAME</th>
+                        <th>STATUS</th>
+                        <th>ACTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (Player player in players)
+                    {
+                        <tr class="match-row">
+                            <td class="highlight">@player.Username</td>
+
+                            <td>
+                                @if (player.IsOnQueue && player.QueueStart != null)
+                                {
+                                    <span class="status-badge searching">
+                                        <span class="dot"></span>
+                                        <span class="dot"></span>
+                                        <span class="dot"></span>
+                                        SEARCHING
+                                    </span>
+                                }
+                                else if (player.OnMatch)
+                                {
+                                    <span class="status-badge in-match">⚔️ IN MATCH</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge idle">IDLE</span>
+                                }
+                            </td>
+
+                            <td>
+                                <button class="btn-remove"
+                                        @onclick="() => RemovePlayer(player.Username)">
+                                    REMOVE
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Player> players = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPlayers();
+    }
+
+    private async Task LoadPlayers()
+    {
+        players.Clear(); 
+
+        var ps = await Api.GetAllPlayersAsync();
+        foreach (var pla in ps)
+        {
+            var fullPlayer = await Api.GetPlayerAsync(pla.Username);
+            players.Add(fullPlayer);
+        }
+    }
+
+    private async Task RemovePlayer(string username)
+    {
+        await Api.DeletePlayerAsync(username);
+        await LoadPlayers(); 
+    }
+}
